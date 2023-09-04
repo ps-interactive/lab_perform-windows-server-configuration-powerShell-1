@@ -14,10 +14,13 @@ $NewUser = Read-Host "New local admin username:"
 $Password = Read-Host -AsSecureString "Create a password for $NewUser"
 
 #Create New User
-New-LocalUser "$NewUser" -Password $Password -FullName "$NewUser" -Description "Temporary local admin" -AccountExpires $((get-date).AddDays(90))
+New-LocalUser "$NewUser" -Password $Password -FullName "$NewUser" -Description "Additional local admin" -AccountExpires $((get-date).AddDays(90))
+
+# Verify properties of new user
+Get-LocalUser -Name "$NewUser" | select-object *
 
 # 1.1.D - Set / Change properties of newly created user
-Set-LocalUser -Name "$NewUser" -AccountNeverExpires -PasswordNeverExpires
+Set-LocalUser -Name "$NewUser" -AccountNeverExpires -PasswordNeverExpires $true
 
 # Verify changes
 Get-LocalUser -Name "$NewUser" | select-object *
