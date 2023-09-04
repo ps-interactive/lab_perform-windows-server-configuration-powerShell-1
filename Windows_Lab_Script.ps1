@@ -1,14 +1,65 @@
-﻿# 1 Create local user and group.
-#https://www.scriptinglibrary.com/languages/powershell/create-a-local-admin-account-with-powershell/
+﻿# 1 - Create local user and group
+
+# 1.1.A - Get list of all local users
+Get-LocalUser
+
+# 1.1.B - List all the properties of Admin user
+Get-LocalUser -Name Administrator | select-object *
+
+# 1.1.C - Create a new user
+#Prompt to enter new user name
+$NewUser = Read-Host "New local admin username:"
+
+#Set password for new user and convert it in secure string
+$Password = Read-Host -AsSecureString "Create a password for $NewUser"
+
+#Create New User
+New-LocalUser "$NewUser" -Password $Password -FullName "$NewUser" -Description "Temporary local admin" -AccountExpires $((get-date).AddDays(90))
+
+# 1.1.D - Set / Change properties of newly created user
+Set-LocalUser -Name "$NewUser" -AccountNeverExpires -PasswordNeverExpires
+
+# Verify changes
+Get-LocalUser -Name "$NewUser" | select-object *
 
 
 
-# Install
+
+# 2 - Create local group
+
+# 1.2.A Get list of all local groups
+Get-LocalGroup
+
+# 1.2.B Create a new local group
+New-LocalGroup -Name "Group1" -Description "This is a test group"
 
 
 
-# 1. Install application using msi file
 
+# 3 - Add local user to local group
+
+# 1.3.A - Get members of local admin group
+Get-LocalGroupMember -Group Administrators
+
+# 1.3.B - Add Admin1 user to local admin group
+Add-LocalGroupMember -Member "$NewUser" -Group Administrators
+
+# 1.3.C - Verify changes
+Get-LocalGroupMember -Group Administrators
+
+
+
+#########################################################################################################
+
+# 2 - Install / Uninstall Windows Roles and Features
+
+
+#########################################################################################################
+
+
+# 3 - Install / Uninstall third-party apps
+
+# 3.1.A - Install application from msi file 
 #Install 7z
 $Arguments = "/i C:\Users\Public\Desktop\7z2301-x64.msi /quiet /norestart /log C:\temp\7z_install.log"
 Start-process -FilePath "msiexec.exe" -ArgumentList $Arguments -Wait -Verbose
@@ -21,7 +72,7 @@ Start-process -FilePath "msiexec.exe" -ArgumentList $Arguments -Wait -Verbose
 # 2. Uninstall application using msiexec
 
 
-$App = Get-WmiObject win32_product | Where-Object {$_.name -like "*7-z*"} | select *
+$App = Get-WmiObject win32_product | Where-Object {$_.name -like "*7-z*"} | select-object *
 
 $App
 
