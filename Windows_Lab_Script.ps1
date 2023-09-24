@@ -56,6 +56,67 @@ Get-LocalGroupMember -Group Administrators
 
 # 2 - Install / Uninstall Windows Roles and Features
 
+# 1 - Retrieve Roles and Features
+# 2.1.A - Retrieve Windows Roles and Features
+Get-WindowsFeature | select Displayname, Name, Installstate
+
+# 2.1.B - Retrieve only Windows Roles
+Get-WindowsFeature | Where-Object{$_.featuretype -eq "Role"} | select Displayname, Installstate, featuretype
+
+# 2.1.C - Retrieve only Windows Features
+Get-WindowsFeature | Where-Object{$_.featuretype -eq "Feature"} | select Displayname, Installstate, featuretype
+
+
+
+
+
+# 2 - Retrieve and install DNS role
+
+# 2.2.A - Retrieve DNS Role
+Get-WindowsFeature -Name DNS
+
+# 2.2.B - Install DNS Role, its subfeatures and management tools
+Install-WindowsFeature -Name DNS -IncludeAllSubFeature -IncludeManagementTools -Verbose
+
+# 2.2.C - Verify DNS Role installation status
+Get-WindowsFeature -Name DNS
+
+
+
+
+
+# 3 - Retrieve sub-features of a Role
+
+# 2.3.A - Retrieve list of sub features for a particular Windows Role
+Get-WindowsFeature -name web-server | select -ExpandProperty SubFeatures
+
+
+
+
+
+# 4 - Retrieve and install a Windows Feature
+
+# 2.4.A - Retrieve Telnet-Client Feature
+Get-WindowsFeature -Name Telnet-Client
+
+# 2.4.B - Install Telnet-Client Feature
+Install-WindowsFeature -Name Telnet-Client -IncludeAllSubFeature -IncludeManagementTools -Verbose
+
+# 2.4.C - Verify Telnet-Client install status
+Get-WindowsFeature -Name Telnet-Client
+
+
+
+
+
+# 4 - Uninstall Windows Role and Feature
+
+# 2.5.A - Uninstall Windows Role and Feature
+"DNS", "Telnet-Client" | %{Uninstall-WindowsFeature -Name $_ -IncludeManagementTools -Verbose}
+
+
+# 2.5.B - Verify Windows Role and Feature Installation Status
+"DNS", "Telnet-Client" | %{Get-WindowsFeature -Name $_}
 
 #########################################################################################################
 
