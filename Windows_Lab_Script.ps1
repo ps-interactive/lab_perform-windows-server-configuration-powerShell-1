@@ -123,61 +123,110 @@ Get-WindowsFeature -Name Telnet-Client
 
 # 3 - Install / Uninstall third-party apps
 
-# 3.1.A - Install application from msi file 
-#Install 7z
-$Arguments = "/i C:\Users\Public\Desktop\7z2301-x64.msi /quiet /norestart /log C:\temp\7z_install.log"
+# 1 - Install application from msi file 
+
+# 3.1.A Create Temp folder for log files
+New-Item -ItemType Directory -Path C:\Temp
+
+# 3.1.B Install 7z
+$Arguments = "/i C:\Users\Public\Desktop\LAB_FILES\Apps\7z2301-x64.msi /quiet /norestart /log C:\temp\7z_install.log"
 Start-process -FilePath "msiexec.exe" -ArgumentList $Arguments -Wait -Verbose
 
-#Install Node
-$Arguments = "/i C:\Users\Public\Desktop\node-v18.17.1-x64.msi /quiet /norestart /log C:\temp\node_install.log"
+# 3.1.C Install NodeJS
+$Arguments = "/i C:\Users\Public\Desktop\LAB_FILES\Apps\node-v18.17.1-x64.msi /quiet /norestart /log C:\temp\node_install.log"
 Start-process -FilePath "msiexec.exe" -ArgumentList $Arguments -Wait -Verbose
 
 
-# 2. Uninstall application using msiexec
 
 
+# 2 - Install application using exe file
+
+# 3.2.A Silently Install Notepad++ using exe file
+Start-Process C:\Users\Public\Desktop\LAB_FILES\Apps\npp.8.5.6.Installer.x64.exe /S -NoNewWindow -Wait -PassThru
+
+
+
+
+# 3 - Uninstall application using msiexec
+
+# 3.3.A Retrieve 7z And store it in a variable
 $App = Get-WmiObject win32_product | Where-Object {$_.name -like "*7-z*"} | select-object *
-
 $App
 
+# 3.3.B Uninstall 7z using msiexec
 $Arguments = "/uninstall $($App.IdentifyingNumber) /quiet /norestart /log C:\temp\7z_uninstall.log"
 Start-Process -FilePath "msiexec.exe" -ArgumentList $Arguments -Wait
 
 
 
 
-# 3. Install exe
-Invoke-WebRequest https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.5.6/npp.8.5.6.Installer.x64.exe -OutFile c:\temp\npp.8.5.6.Installer.x64.exe
 
-Start-Process C:\Users\Public\Desktop\npp.8.5.6.Installer.x64.exe /S -NoNewWindow -Wait -PassThru
+# 4 - Uninstall Application using 
 
-
-
-#Uninstall Application
-
-$AllApps = Get-WmiObject win32_product
-$Node = $AllApps | Where-Object {$_.name -like "*node*"}
-$Node.Uninstall()
-
-<#
-Win32_Product will only return applications installed via Windows Installer.
-There are many products used to assemble installers that don’t build Windows Installer packages.
-Any applications that use these non-Windows Installer packages for deployment won’t be returned when Win32_Product is queried.
-
-https://xkln.net/blog/please-stop-using-win32product-to-find-installed-software-alternatives-inside/#:~:text=Win32_Product%20will%20only%20return%20applications,returned%20when%20Win32_Product%20is%20queried.
-
-https://learn.microsoft.com/en-us/answers/questions/685494/get-wmiobject-computername-computer-class-win32-pr
-#>
-
+# 3.4.A Retrieve all apps under win_32 product class
 $Apps32 = @()
 $Apps = @()
 $Apps32 += Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" # 32 Bit
 $Apps += Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Notepad++"
 
-
+# 3.4.B 
 $NPPlus = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Notepad++"
 
+# 3.4.C 
 $parts = $NPPlus.QuietUninstallString -split " "
 $exe = $parts[0] + " " + $parts[1]
 $Arguments = $parts[2]
 Start-Process -FilePath $exe -ArgumentList $Arguments -Wait
+
+
+
+
+
+# 5 - Uninstall Application using Uninstall() method
+
+# 3.5.A Retrieve and uninstall NodeJS application
+$AllApps = Get-WmiObject win32_product | Where-Object {$_.name -like "*node*"}
+$Node.Uninstall()
+
+
+#########################################################################################################
+
+<#
+PATH variable is a system environment variable that your operating system uses to locate executables from the command line interface. We usually use this 
+when it comes to developing various programs with different types of programming languages. However, setting this up inside the PowerShell environment is quite different.
+#>
+
+# 4 - Managing Path variable
+
+# 4.1.A - Retrieve environment variables
+Get-ChildItem Env:\
+
+
+# 4.2.A - Retrieve existing Path Settings
+[Environment]::GetEnvironmentVariable("PATH", "Machine")
+
+[Environment]::GetEnvironmentVariable("PATH", "User")
+
+
+# 4.2.B - Display path variable's values in properly formatted way
+[Environment]::GetEnvironmentVariable("PATH", "Machine") -split ";"
+
+
+
+# 4.3.A - Set system and user environment variable
+$NewPath = "C:\Temp"
+
+$PathMac = [Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + $NewPath 
+
+$PathUsr = [Environment]::GetEnvironmentVariable("PATH", "User") + ";" + $NewPath
+
+
+[Environment]::SetEnvironmentVariable( "Path", $PathMac, "Machine")
+
+[Environment]::SetEnvironmentVariable( "Path", $PathUsr, "User")
+
+
+# 4.3.B - Verify newly added path
+[Environment]::GetEnvironmentVariable("PATH", "Machine")
+
+[Environment]::GetEnvironmentVariable("PATH", "User")
