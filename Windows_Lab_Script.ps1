@@ -191,42 +191,68 @@ $Node.Uninstall()
 
 #########################################################################################################
 
-<#
-PATH variable is a system environment variable that your operating system uses to locate executables from the command line interface. We usually use this 
-when it comes to developing various programs with different types of programming languages. However, setting this up inside the PowerShell environment is quite different.
-#>
 
 # 4 - Managing Path variable
 
-# 4.1.A - Retrieve environment variables
-Get-ChildItem Env:\
+# 4.1.A - Retrieve existing Path Settings
 
-
-# 4.2.A - Retrieve existing Path Settings
 [Environment]::GetEnvironmentVariable("PATH", "Machine")
-
 [Environment]::GetEnvironmentVariable("PATH", "User")
 
 
-# 4.2.B - Display path variable's values in properly formatted way
+# 4.1.B - Display path variable's values in properly formatted way
+
 [Environment]::GetEnvironmentVariable("PATH", "Machine") -split ";"
 
 
 
-# 4.3.A - Set system and user environment variable
+
+
+# 4.2.A - Setting a folder path to add in environment variable
+
 $NewPath = "C:\Temp"
 
+
+# 4.2.B - Get existing system and user environment variable, add new path to it and store in variable
+
 $PathMac = [Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + $NewPath 
+$PathUsr = [Environment]::GetEnvironmentVariable("PATH", "User") + $NewPath
 
-$PathUsr = [Environment]::GetEnvironmentVariable("PATH", "User") + ";" + $NewPath
 
+# 4.2.C - Set system and user environment variable
 
 [Environment]::SetEnvironmentVariable( "Path", $PathMac, "Machine")
-
 [Environment]::SetEnvironmentVariable( "Path", $PathUsr, "User")
 
 
 # 4.3.B - Verify newly added path
-[Environment]::GetEnvironmentVariable("PATH", "Machine")
 
+[Environment]::GetEnvironmentVariable("PATH", "Machine")
 [Environment]::GetEnvironmentVariable("PATH", "User")
+
+
+#########################################################################################################
+
+
+# 5 - Setting Time Zone
+
+# 5.1.A - Get current time zone
+
+Get-TimeZone
+
+
+# 5.1.B - Get list of all available time zones
+
+Get-TimeZone -ListAvailable
+
+
+# 5.1.C - Set a new time zone on the server using time zone ID
+
+Set-TimeZone -Id "Central Standard Time"
+Get-TimeZone
+
+
+# 5.1.D - Set a new time zone on the server using time zone name
+
+Set-TimeZone -Name "Mountain Standard Time"
+Get-TimeZone
