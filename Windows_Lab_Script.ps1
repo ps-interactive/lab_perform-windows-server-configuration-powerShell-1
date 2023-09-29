@@ -161,9 +161,9 @@ Start-Process -FilePath "msiexec.exe" -ArgumentList $Arguments -Wait
 
 
 
-# 4 - Uninstall Application using 
+# 4 - Uninstall Application using registry data
 
-# 3.4.A Retrieve all apps under win_32 product class
+# 3.4.A Retrieve all apps details from registry
 $Apps32 = @()
 $Apps = @()
 $Apps32 += Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" # 32 Bit
@@ -185,7 +185,7 @@ Start-Process -FilePath $exe -ArgumentList $Arguments -Wait
 # 5 - Uninstall Application using Uninstall() method
 
 # 3.5.A Retrieve and uninstall NodeJS application
-$AllApps = Get-WmiObject win32_product | Where-Object {$_.name -like "*node*"}
+$Node = Get-WmiObject win32_product | Where-Object {$_.name -like "*node*"}
 $Node.Uninstall()
 
 
